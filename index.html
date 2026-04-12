@@ -66,10 +66,11 @@
   input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   select option { background: var(--surface); }
   textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
-  .bias-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .bias-btn { padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .bias-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .bias-btn { padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
   .bias-btn.bull.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
   .bias-btn.bear.active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .bias-btn.cons.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
   .conf-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
   .conf-block:last-child { margin-bottom: 0; }
   .conf-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 10px; }
@@ -80,7 +81,7 @@
   .fixed-field { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--muted); line-height: 1.6; font-style: italic; }
   .timestamp-bar { background: var(--accent-dim); border: 1px solid rgba(240,180,41,0.2); border-radius: 8px; padding: 10px 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); margin-bottom: 16px; }
   .webhook-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
-  .rr-display { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--accent); text-align: center; min-height: 44px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .rr-display { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--accent); text-align: center; min-height: 44px; display: flex; align-items: center; justify-content: center; }
   .rr-display.good { border-color: var(--green); color: var(--green); }
   .rr-display.ok { border-color: var(--accent); color: var(--accent); }
   .rr-display.bad { border-color: var(--red); color: var(--red); }
@@ -159,6 +160,7 @@
           <div class="bias-toggle" style="margin-top:2px">
             <button class="bias-btn bull active" id="bull-btn" onclick="setBias('BULLISH')">🟢 Bull</button>
             <button class="bias-btn bear" id="bear-btn" onclick="setBias('BEARISH')">🔴 Bear</button>
+            <button class="bias-btn cons" id="cons-btn" onclick="setBias('CONSOLIDATION')">🟡 Cons</button>
           </div>
         </div>
       </div>
@@ -177,27 +179,14 @@
       <div class="field"><label>Key Levels</label><input type="text" id="key-levels" placeholder="e.g. 4,863 support · 4,500 major demand" /></div>
     </div>
 
-    <!-- RR CALCULATOR -->
     <div class="section">
       <div class="section-label">RR Calculator</div>
       <div class="row row-3" style="margin-bottom:12px">
-        <div class="field">
-          <label>Entry Price</label>
-          <input type="number" id="rr-entry" placeholder="e.g. 19450" oninput="calcRR()" />
-        </div>
-        <div class="field">
-          <label>Target Price</label>
-          <input type="number" id="rr-target" placeholder="e.g. 19150" oninput="calcRR()" />
-        </div>
-        <div class="field">
-          <label>Stop Price</label>
-          <input type="number" id="rr-stop" placeholder="e.g. 19520" oninput="calcRR()" />
-        </div>
+        <div class="field"><label>Entry Price</label><input type="number" id="rr-entry" placeholder="e.g. 19450" oninput="calcRR()" /></div>
+        <div class="field"><label>Target Price</label><input type="number" id="rr-target" placeholder="e.g. 19150" oninput="calcRR()" /></div>
+        <div class="field"><label>Stop Price</label><input type="number" id="rr-stop" placeholder="e.g. 19520" oninput="calcRR()" /></div>
       </div>
-      <div class="field">
-        <label>Est. RR Ratio</label>
-        <div class="rr-display" id="rr-display">— enter prices above</div>
-      </div>
+      <div class="field"><label>Est. RR Ratio</label><div class="rr-display" id="rr-display">— enter prices above</div></div>
     </div>
 
     <div class="section">
@@ -270,8 +259,14 @@
 </div>
 
 <script>
-  const PASSWORD = "KTLA2026";
-  const ROLES = { elite: "1480597571075444946", ktl: "1480597267135070228", mentorship: "1480597671910838322" };
+  // ★ CHANGE YOUR PASSWORD HERE ★
+  const PASSWORD = "CHANGEME123";
+
+  const ROLES = {
+    elite:      "1480597571075444946",
+    ktl:        "1480597267135070228",
+    mentorship: "1480597671910838322"
+  };
 
   function checkPassword() {
     if (document.getElementById('pw-input').value === PASSWORD) {
@@ -303,7 +298,12 @@
   function buildPingString() { return [...activePings].map(r => `<@&${ROLES[r]}>`).join(' '); }
 
   let currentBias = 'BULLISH';
-  function setBias(b) { currentBias = b; document.getElementById('bull-btn').classList.toggle('active', b === 'BULLISH'); document.getElementById('bear-btn').classList.toggle('active', b === 'BEARISH'); }
+  function setBias(b) {
+    currentBias = b;
+    document.getElementById('bull-btn').classList.toggle('active', b === 'BULLISH');
+    document.getElementById('bear-btn').classList.toggle('active', b === 'BEARISH');
+    document.getElementById('cons-btn').classList.toggle('active', b === 'CONSOLIDATION');
+  }
 
   let activeMA = new Set();
   function toggleMA(ma, type) { const btn = document.getElementById('ma-'+ma); const cls = type === 'ema' ? 'ema-active' : 'sma-active'; if (activeMA.has(ma)) { activeMA.delete(ma); btn.classList.remove(cls); } else { activeMA.add(ma); btn.classList.add(cls); } }
@@ -317,38 +317,17 @@
 
   function buildFibString() { const level = document.getElementById('fib-level').value; const tf = document.getElementById('fib-tf').value; if (level === 'None') return 'None'; return tf !== '—' ? `${level} — drawn on ${tf}` : level; }
 
-  // RR CALCULATOR
   let calculatedRR = '—';
   function calcRR() {
-    const entry  = parseFloat(document.getElementById('rr-entry').value);
+    const entry = parseFloat(document.getElementById('rr-entry').value);
     const target = parseFloat(document.getElementById('rr-target').value);
-    const stop   = parseFloat(document.getElementById('rr-stop').value);
-    const el     = document.getElementById('rr-display');
-
-    if (!entry || !target || !stop) {
-      el.textContent = '— enter prices above';
-      el.className = 'rr-display';
-      calculatedRR = '—';
-      return;
-    }
-
-    const reward = Math.abs(target - entry);
-    const risk   = Math.abs(stop - entry);
-
-    if (risk === 0) {
-      el.textContent = 'Invalid — entry = stop';
-      el.className = 'rr-display bad';
-      calculatedRR = '—';
-      return;
-    }
-
-    const ratio = (reward / risk).toFixed(1);
-    calculatedRR = `~1:${ratio}`;
-    el.textContent = `~1:${ratio}`;
-
-    if (ratio >= 3) { el.className = 'rr-display good'; }
-    else if (ratio >= 2) { el.className = 'rr-display ok'; }
-    else { el.className = 'rr-display bad'; }
+    const stop = parseFloat(document.getElementById('rr-stop').value);
+    const el = document.getElementById('rr-display');
+    if (!entry || !target || !stop) { el.textContent = '— enter prices above'; el.className = 'rr-display'; calculatedRR = '—'; return; }
+    const reward = Math.abs(target - entry); const risk = Math.abs(stop - entry);
+    if (risk === 0) { el.textContent = 'Invalid'; el.className = 'rr-display bad'; calculatedRR = '—'; return; }
+    const ratio = (reward / risk).toFixed(1); calculatedRR = '~1:'+ratio; el.textContent = '~1:'+ratio;
+    if (ratio >= 3) { el.className = 'rr-display good'; } else if (ratio >= 2) { el.className = 'rr-display ok'; } else { el.className = 'rr-display bad'; }
   }
 
   async function postToDiscord() {
@@ -371,8 +350,9 @@
     const notes       = document.getElementById('notes').value || '—';
     const chartLink   = document.getElementById('chart-link').value.trim();
     const timestamp   = getEST() + ' EST';
-    const biasEmoji   = currentBias === 'BULLISH' ? '🟢' : '🔴';
-    const color       = currentBias === 'BULLISH' ? 3866394 : 15548997;
+
+    const biasEmoji = currentBias === 'BULLISH' ? '🟢' : currentBias === 'BEARISH' ? '🔴' : '🟡';
+    const color     = currentBias === 'BULLISH' ? 3866394 : currentBias === 'BEARISH' ? 15548997 : 16750848;
 
     const description =
 `${biasEmoji} **${currentBias} BIAS**
