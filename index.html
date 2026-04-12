@@ -66,7 +66,8 @@
   input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   select option { background: var(--surface); }
   textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
-  .bias-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .toggle-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .toggle-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .bias-btn { padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
   .bias-btn.bull.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
   .bias-btn.bear.active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
@@ -152,17 +153,30 @@
 
     <div class="section">
       <div class="section-label">Setup Info</div>
-      <div class="row row-4">
+      <div class="row row-2" style="margin-bottom:12px">
         <div class="field"><label>Symbol</label><select id="symbol"><option>NQ</option><option>ES</option><option>CL</option><option>GC</option></select></div>
         <div class="field"><label>Timeframe</label><select id="timeframe"><option>2M</option><option>5M</option><option>30M</option><option>1H</option><option>4H</option><option>Daily</option></select></div>
-        <div class="field"><label>Type</label><select id="type"><option>LONG</option><option>SHORT</option></select></div>
-        <div class="field"><label>Bias</label>
-          <div class="bias-toggle" style="margin-top:2px">
-            <button class="bias-btn bull active" id="bull-btn" onclick="setBias('BULLISH')">🟢 Bull</button>
-            <button class="bias-btn bear" id="bear-btn" onclick="setBias('BEARISH')">🔴 Bear</button>
-            <button class="bias-btn cons" id="cons-btn" onclick="setBias('CONSOLIDATION')">🟡 Cons</button>
+      </div>
+      <div class="row row-2" style="margin-bottom:12px">
+        <div class="field">
+          <label>Market Condition</label>
+          <div class="toggle-3" style="margin-top:2px">
+            <button class="bias-btn bull active" id="mc-bull" onclick="setMarketCondition('BULLISH')">🟢 Bull</button>
+            <button class="bias-btn bear" id="mc-bear" onclick="setMarketCondition('BEARISH')">🔴 Bear</button>
+            <button class="bias-btn cons" id="mc-cons" onclick="setMarketCondition('CONSOLIDATION')">🟡 Cons</button>
           </div>
         </div>
+        <div class="field">
+          <label>Bias</label>
+          <div class="toggle-2" style="margin-top:2px">
+            <button class="bias-btn bull active" id="bias-bull" onclick="setBias('BULLISH')">🟢 Bullish</button>
+            <button class="bias-btn bear" id="bias-bear" onclick="setBias('BEARISH')">🔴 Bearish</button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <select id="type"><option>LONG</option><option>SHORT</option></select>
       </div>
     </div>
 
@@ -259,9 +273,7 @@
 </div>
 
 <script>
-  // ★ CHANGE YOUR PASSWORD HERE ★
   const PASSWORD = "KTLA2026";
-
   const ROLES = {
     elite:      "1480597571075444946",
     ktl:        "1480597267135070228",
@@ -297,12 +309,19 @@
   function updateAllBtn() { document.getElementById('ping-all').classList.toggle('all-active', ['elite','ktl','mentorship'].every(r => activePings.has(r))); }
   function buildPingString() { return [...activePings].map(r => `<@&${ROLES[r]}>`).join(' '); }
 
+  let currentMarketCondition = 'BULLISH';
+  function setMarketCondition(mc) {
+    currentMarketCondition = mc;
+    document.getElementById('mc-bull').classList.toggle('active', mc === 'BULLISH');
+    document.getElementById('mc-bear').classList.toggle('active', mc === 'BEARISH');
+    document.getElementById('mc-cons').classList.toggle('active', mc === 'CONSOLIDATION');
+  }
+
   let currentBias = 'BULLISH';
   function setBias(b) {
     currentBias = b;
-    document.getElementById('bull-btn').classList.toggle('active', b === 'BULLISH');
-    document.getElementById('bear-btn').classList.toggle('active', b === 'BEARISH');
-    document.getElementById('cons-btn').classList.toggle('active', b === 'CONSOLIDATION');
+    document.getElementById('bias-bull').classList.toggle('active', b === 'BULLISH');
+    document.getElementById('bias-bear').classList.toggle('active', b === 'BEARISH');
   }
 
   let activeMA = new Set();
@@ -316,6 +335,12 @@
   }
 
   function buildFibString() { const level = document.getElementById('fib-level').value; const tf = document.getElementById('fib-tf').value; if (level === 'None') return 'None'; return tf !== '—' ? `${level} — drawn on ${tf}` : level; }
+
+  function getMCEmoji(mc) { return mc === 'BULLISH' ? '🟢' : mc === 'BEARISH' ? '🔴' : '🟡'; }
+  function getMCColor(mc, bias) {
+    if (mc === 'CONSOLIDATION') return 16750848;
+    return bias === 'BULLISH' ? 3866394 : 15548997;
+  }
 
   let calculatedRR = '—';
   function calcRR() {
@@ -351,11 +376,13 @@
     const chartLink   = document.getElementById('chart-link').value.trim();
     const timestamp   = getEST() + ' EST';
 
-    const biasEmoji = currentBias === 'BULLISH' ? '🟢' : currentBias === 'BEARISH' ? '🔴' : '🟡';
-    const color     = currentBias === 'BULLISH' ? 3866394 : currentBias === 'BEARISH' ? 15548997 : 16750848;
+    const mcEmoji   = getMCEmoji(currentMarketCondition);
+    const biasEmoji = currentBias === 'BULLISH' ? '🟢' : '🔴';
+    const color     = getMCColor(currentMarketCondition, currentBias);
 
     const description =
-`${biasEmoji} **${currentBias} BIAS**
+`${mcEmoji} **MARKET CONDITION: ${currentMarketCondition}**
+${biasEmoji} **BIAS: ${currentBias}**
 
 **📍 Primary Zone — ${primaryZone}**
 > 🎯 Zone Range: \`${interest}\`
