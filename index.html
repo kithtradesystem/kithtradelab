@@ -187,20 +187,23 @@
         <div class="field"><label>Zone Range</label><input type="text" id="zone-interest" placeholder="e.g. 5,000 – 5,043" /></div>
       </div>
       <div class="row row-2" style="margin-bottom:12px">
-        <div class="field"><label>Target Area</label><input type="text" id="zone-target" placeholder="e.g. 4,600 – 4,650" /></div>
         <div class="field"><label>Risk Zone</label><input type="text" id="zone-risk" placeholder="e.g. 5,100 – 5,150" /></div>
+        <div class="field"><label>Key Levels</label><input type="text" id="key-levels" placeholder="e.g. 4,863 support · 4,500 major demand" /></div>
       </div>
-      <div class="field"><label>Key Levels</label><input type="text" id="key-levels" placeholder="e.g. 4,863 support · 4,500 major demand" /></div>
     </div>
 
     <div class="section">
       <div class="section-label">RR Calculator</div>
       <div class="row row-3" style="margin-bottom:12px">
         <div class="field"><label>Entry Price</label><input type="number" id="rr-entry" placeholder="e.g. 19450" oninput="calcRR()" /></div>
-        <div class="field"><label>Target Price</label><input type="number" id="rr-target" placeholder="e.g. 19150" oninput="calcRR()" /></div>
         <div class="field"><label>Stop Price</label><input type="number" id="rr-stop" placeholder="e.g. 19520" oninput="calcRR()" /></div>
+        <div class="field"><label>Est. RR Ratio</label><div class="rr-display" id="rr-display">— enter prices</div></div>
       </div>
-      <div class="field"><label>Est. RR Ratio</label><div class="rr-display" id="rr-display">— enter prices above</div></div>
+      <div class="row row-3">
+        <div class="field"><label>Take Profit 1</label><input type="number" id="tp1" placeholder="e.g. 19300" oninput="calcRR()" /></div>
+        <div class="field"><label>Take Profit 2</label><input type="number" id="tp2" placeholder="e.g. 19150" /></div>
+        <div class="field"><label>Take Profit 3 (optional)</label><input type="number" id="tp3" placeholder="e.g. 19000" /></div>
+      </div>
     </div>
 
     <div class="section">
@@ -210,21 +213,13 @@
         <div class="row row-2">
           <div class="field"><label>Zone / Level</label>
             <select id="conf1-zone">
-              <option>—</option>
-              <option>Supply Zone</option>
-              <option>Demand Zone</option>
-              <option>Imbalance</option>
-              <option>Support</option>
-              <option>Resistance</option>
-              <option>Trendline</option>
-              <option>EMA</option>
-              <option>SMA</option>
-              <option>VWAP</option>
-              <option>Market Structure</option>
-              <option>Liquidity Sweep</option>
+              <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
+              <option>Imbalance</option><option>Support</option><option>Resistance</option>
+              <option>Trendline</option><option>EMA</option><option>SMA</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
             </select>
           </div>
-          <div class="field"><label>Note</label><input type="text" id="conf1-note" placeholder="e.g. price swept buy side liquidity" /></div>
+          <div class="field"><label>Note</label><input type="text" id="conf1-note" placeholder="describe the confluence" /></div>
         </div>
       </div>
       <div class="conf-block">
@@ -232,18 +227,10 @@
         <div class="row row-2">
           <div class="field"><label>Zone / Level</label>
             <select id="conf2-zone">
-              <option>—</option>
-              <option>Supply Zone</option>
-              <option>Demand Zone</option>
-              <option>Imbalance</option>
-              <option>Support</option>
-              <option>Resistance</option>
-              <option>Trendline</option>
-              <option>EMA</option>
-              <option>SMA</option>
-              <option>VWAP</option>
-              <option>Market Structure</option>
-              <option>Liquidity Sweep</option>
+              <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
+              <option>Imbalance</option><option>Support</option><option>Resistance</option>
+              <option>Trendline</option><option>EMA</option><option>SMA</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
             </select>
           </div>
           <div class="field"><label>Note</label><input type="text" id="conf2-note" placeholder="optional" /></div>
@@ -254,18 +241,10 @@
         <div class="row row-2">
           <div class="field"><label>Zone / Level</label>
             <select id="conf3-zone">
-              <option>—</option>
-              <option>Supply Zone</option>
-              <option>Demand Zone</option>
-              <option>Imbalance</option>
-              <option>Support</option>
-              <option>Resistance</option>
-              <option>Trendline</option>
-              <option>EMA</option>
-              <option>SMA</option>
-              <option>VWAP</option>
-              <option>Market Structure</option>
-              <option>Liquidity Sweep</option>
+              <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
+              <option>Imbalance</option><option>Support</option><option>Resistance</option>
+              <option>Trendline</option><option>EMA</option><option>SMA</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
             </select>
           </div>
           <div class="field"><label>Note</label><input type="text" id="conf3-note" placeholder="optional" /></div>
@@ -382,19 +361,16 @@
   function buildFibString() { const level = document.getElementById('fib-level').value; const tf = document.getElementById('fib-tf').value; if (level === 'None') return 'None'; return tf !== '—' ? `${level} — drawn on ${tf}` : level; }
 
   function getMCEmoji(mc) { return mc === 'BULLISH' ? '🟢' : mc === 'BEARISH' ? '🔴' : '🟡'; }
-  function getMCColor(mc, bias) {
-    if (mc === 'CONSOLIDATION') return 16750848;
-    return bias === 'BULLISH' ? 3866394 : 15548997;
-  }
+  function getMCColor(mc, bias) { if (mc === 'CONSOLIDATION') return 16750848; return bias === 'BULLISH' ? 3866394 : 15548997; }
 
   let calculatedRR = '—';
   function calcRR() {
     const entry = parseFloat(document.getElementById('rr-entry').value);
-    const target = parseFloat(document.getElementById('rr-target').value);
-    const stop = parseFloat(document.getElementById('rr-stop').value);
-    const el = document.getElementById('rr-display');
-    if (!entry || !target || !stop) { el.textContent = '— enter prices above'; el.className = 'rr-display'; calculatedRR = '—'; return; }
-    const reward = Math.abs(target - entry); const risk = Math.abs(stop - entry);
+    const tp1   = parseFloat(document.getElementById('tp1').value);
+    const stop  = parseFloat(document.getElementById('rr-stop').value);
+    const el    = document.getElementById('rr-display');
+    if (!entry || !tp1 || !stop) { el.textContent = '— enter prices'; el.className = 'rr-display'; calculatedRR = '—'; return; }
+    const reward = Math.abs(tp1 - entry); const risk = Math.abs(stop - entry);
     if (risk === 0) { el.textContent = 'Invalid'; el.className = 'rr-display bad'; calculatedRR = '—'; return; }
     const ratio = (reward / risk).toFixed(1); calculatedRR = '~1:'+ratio; el.textContent = '~1:'+ratio;
     if (ratio >= 3) { el.className = 'rr-display good'; } else if (ratio >= 2) { el.className = 'rr-display ok'; } else { el.className = 'rr-display bad'; }
@@ -411,9 +387,11 @@
     const type        = document.getElementById('type').value;
     const primaryZone = document.getElementById('primary-zone').value;
     const interest    = document.getElementById('zone-interest').value || '—';
-    const target      = document.getElementById('zone-target').value || '—';
     const risk        = document.getElementById('zone-risk').value || '—';
     const keyLevels   = document.getElementById('key-levels').value || '—';
+    const tp1         = document.getElementById('tp1').value || '—';
+    const tp2         = document.getElementById('tp2').value || '—';
+    const tp3         = document.getElementById('tp3').value || '';
     const whatISee    = document.getElementById('what-i-see').value || '—';
     const trigger     = document.getElementById('trigger').value || '—';
     const mindset     = document.getElementById('mindset').value || '—';
@@ -424,6 +402,7 @@
     const mcEmoji   = getMCEmoji(currentMarketCondition);
     const biasEmoji = currentBias === 'BULLISH' ? '🟢' : '🔴';
     const color     = getMCColor(currentMarketCondition, currentBias);
+    const tp3Line   = tp3 ? `\n> 🎯 Take Profit 3: \`${tp3}\`` : '';
 
     const description =
 `${mcEmoji} **MARKET CONDITION: ${currentMarketCondition}**
@@ -431,9 +410,12 @@ ${biasEmoji} **BIAS: ${currentBias}**
 
 **📍 Primary Zone — ${primaryZone}**
 > 🎯 Zone Range: \`${interest}\`
-> ✅ Target Area: \`${target}\`
-> 🛑 Risk Zone: \`${risk}\`
+> 💰 Entry: \`${document.getElementById('rr-entry').value || '—'}\`
+> 🛑 Stop Loss: \`${document.getElementById('rr-stop').value || '—'}\`
+> 🎯 Take Profit 1: \`${tp1}\`
+> 🎯 Take Profit 2: \`${tp2}\`${tp3Line}
 > ⚖️ Est. RR: \`${calculatedRR}\`
+> 🛡️ Risk Zone: \`${risk}\`
 > 🔑 Key Levels: ${keyLevels}
 
 **🔀 Confluences**
