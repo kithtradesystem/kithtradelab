@@ -72,6 +72,14 @@
   .bias-btn.bull.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
   .bias-btn.bear.active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
   .bias-btn.cons.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .entry-btn { padding: 14px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .entry-btn .entry-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .entry-btn .entry-label { font-size: 11px; }
+  .entry-btn.sd-active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .entry-btn.ema-active { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+  .entry-btn.liq-active { border-color: var(--purple); background: var(--purple-dim); color: var(--purple); }
+  .entry-btn.other-active { border-color: var(--green); background: var(--green-dim); color: var(--green); }
   .conf-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
   .conf-block:last-child { margin-bottom: 0; }
   .conf-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 10px; }
@@ -92,7 +100,7 @@
   .status-ok { color: var(--green); } .status-err { color: var(--red); }
   @media (max-width: 600px) {
     .row-3, .row-4, .ma-grid { grid-template-columns: 1fr 1fr; }
-    .row-2 { grid-template-columns: 1fr; }
+    .row-2, .entry-grid { grid-template-columns: 1fr 1fr; }
     .topbar, .nav { padding: 0 16px; }
     .main { padding: 24px 16px 60px; }
   }
@@ -180,6 +188,29 @@
       </div>
     </div>
 
+    <!-- ENTRY TYPE -->
+    <div class="section">
+      <div class="section-label">Entry Type</div>
+      <div class="entry-grid">
+        <button class="entry-btn" id="entry-sd" onclick="setEntry('sd')">
+          <span class="entry-icon">📍</span>
+          <span class="entry-label">S&D + Fibs Entry</span>
+        </button>
+        <button class="entry-btn" id="entry-ema" onclick="setEntry('ema')">
+          <span class="entry-icon">📈</span>
+          <span class="entry-label">EMA Pullback Entry</span>
+        </button>
+        <button class="entry-btn" id="entry-liq" onclick="setEntry('liq')">
+          <span class="entry-icon">💧</span>
+          <span class="entry-label">Liquidity Sweep Entry</span>
+        </button>
+        <button class="entry-btn" id="entry-other" onclick="setEntry('other')">
+          <span class="entry-icon">⚙️</span>
+          <span class="entry-label">Other</span>
+        </button>
+      </div>
+    </div>
+
     <div class="section">
       <div class="section-label">Primary Zone</div>
       <div class="row row-2" style="margin-bottom:12px">
@@ -216,7 +247,7 @@
               <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
               <option>Imbalance</option><option>Support</option><option>Resistance</option>
               <option>Trendline</option><option>EMA</option><option>SMA</option>
-              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option><option>Fib</option>
             </select>
           </div>
           <div class="field"><label>Note</label><input type="text" id="conf1-note" placeholder="describe the confluence" /></div>
@@ -230,7 +261,7 @@
               <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
               <option>Imbalance</option><option>Support</option><option>Resistance</option>
               <option>Trendline</option><option>EMA</option><option>SMA</option>
-              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option><option>Fib</option>
             </select>
           </div>
           <div class="field"><label>Note</label><input type="text" id="conf2-note" placeholder="optional" /></div>
@@ -244,7 +275,7 @@
               <option>—</option><option>Supply Zone</option><option>Demand Zone</option>
               <option>Imbalance</option><option>Support</option><option>Resistance</option>
               <option>Trendline</option><option>EMA</option><option>SMA</option>
-              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option>
+              <option>VWAP</option><option>Market Structure</option><option>Liquidity Sweep</option><option>Fib</option>
             </select>
           </div>
           <div class="field"><label>Note</label><input type="text" id="conf3-note" placeholder="optional" /></div>
@@ -348,6 +379,20 @@
     document.getElementById('bias-bear').classList.toggle('active', b === 'BEARISH');
   }
 
+  const entryTypes = {
+    sd:    { label: 'S&D + Fibs Entry',      cls: 'sd-active'    },
+    ema:   { label: 'EMA Pullback Entry',     cls: 'ema-active'   },
+    liq:   { label: 'Liquidity Sweep Entry',  cls: 'liq-active'   },
+    other: { label: 'Other',                  cls: 'other-active' }
+  };
+  let currentEntry = null;
+  function setEntry(e) {
+    ['sd','ema','liq','other'].forEach(k => { document.getElementById('entry-'+k).className = 'entry-btn'; });
+    if (currentEntry === e) { currentEntry = null; return; }
+    currentEntry = e;
+    document.getElementById('entry-'+e).classList.add(entryTypes[e].cls);
+  }
+
   let activeMA = new Set();
   function toggleMA(ma, type) { const btn = document.getElementById('ma-'+ma); const cls = type === 'ema' ? 'ema-active' : 'sma-active'; if (activeMA.has(ma)) { activeMA.delete(ma); btn.classList.remove(cls); } else { activeMA.add(ma); btn.classList.add(cls); } }
   function buildMAString() { const labels = { ema9: 'EMA 9', ema21: 'EMA 21', sma50: 'SMA 50', sma200: 'SMA 200' }; return [...activeMA].map(m => labels[m]).join(' · ') || 'None'; }
@@ -359,7 +404,6 @@
   }
 
   function buildFibString() { const level = document.getElementById('fib-level').value; const tf = document.getElementById('fib-tf').value; if (level === 'None') return 'None'; return tf !== '—' ? `${level} — drawn on ${tf}` : level; }
-
   function getMCEmoji(mc) { return mc === 'BULLISH' ? '🟢' : mc === 'BEARISH' ? '🔴' : '🟡'; }
   function getMCColor(mc, bias) { if (mc === 'CONSOLIDATION') return 16750848; return bias === 'BULLISH' ? 3866394 : 15548997; }
 
@@ -389,6 +433,8 @@
     const interest    = document.getElementById('zone-interest').value || '—';
     const risk        = document.getElementById('zone-risk').value || '—';
     const keyLevels   = document.getElementById('key-levels').value || '—';
+    const entry       = document.getElementById('rr-entry').value || '—';
+    const stop        = document.getElementById('rr-stop').value || '—';
     const tp1         = document.getElementById('tp1').value || '—';
     const tp2         = document.getElementById('tp2').value || '—';
     const tp3         = document.getElementById('tp3').value || '';
@@ -403,15 +449,16 @@
     const biasEmoji = currentBias === 'BULLISH' ? '🟢' : '🔴';
     const color     = getMCColor(currentMarketCondition, currentBias);
     const tp3Line   = tp3 ? `\n> 🎯 Take Profit 3: \`${tp3}\`` : '';
+    const entryTag  = currentEntry ? `\`${entryTypes[currentEntry].label.toUpperCase()}\`\n\n` : '';
 
     const description =
-`${mcEmoji} **MARKET CONDITION: ${currentMarketCondition}**
+`${entryTag}${mcEmoji} **MARKET CONDITION: ${currentMarketCondition}**
 ${biasEmoji} **BIAS: ${currentBias}**
 
 **📍 Primary Zone — ${primaryZone}**
 > 🎯 Zone Range: \`${interest}\`
-> 💰 Entry: \`${document.getElementById('rr-entry').value || '—'}\`
-> 🛑 Stop Loss: \`${document.getElementById('rr-stop').value || '—'}\`
+> 💰 Entry: \`${entry}\`
+> 🛑 Stop Loss: \`${stop}\`
 > 🎯 Take Profit 1: \`${tp1}\`
 > 🎯 Take Profit 2: \`${tp2}\`${tp3Line}
 > ⚖️ Est. RR: \`${calculatedRR}\`
