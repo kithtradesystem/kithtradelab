@@ -42,6 +42,7 @@
   .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
   .section-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .sub-label { font-size: 11px; color: var(--accent); font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-bottom: 8px; }
   .channels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
   .ch-btn { padding: 14px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: left; transition: all 0.2s; }
   .ch-btn .ch-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
@@ -72,6 +73,10 @@
   .bias-btn.bull.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
   .bias-btn.bear.active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
   .bias-btn.cons.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .str-btn { padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .str-btn.bull-active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .str-btn.bear-active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .str-btn.cons-active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
   .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .entry-btn { padding: 14px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
   .entry-btn .entry-icon { font-size: 18px; display: block; margin-bottom: 4px; }
@@ -185,6 +190,29 @@
       <div class="field">
         <label>Type</label>
         <select id="type"><option>LONG</option><option>SHORT</option></select>
+      </div>
+    </div>
+
+    <!-- MARKET STRUCTURE -->
+    <div class="section">
+      <div class="section-label">Market Structure</div>
+      <div class="row row-2">
+        <div class="field">
+          <div class="sub-label">📈 HTF — Higher Time Frame</div>
+          <div class="toggle-3">
+            <button class="str-btn" id="htf-bull" onclick="setStructure('htf','BULLISH')">🟢 Bullish</button>
+            <button class="str-btn" id="htf-bear" onclick="setStructure('htf','BEARISH')">🔴 Bearish</button>
+            <button class="str-btn" id="htf-cons" onclick="setStructure('htf','CONSOLIDATION')">🟡 Cons</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="sub-label">📉 LTF — Lower Time Frame</div>
+          <div class="toggle-3">
+            <button class="str-btn" id="ltf-bull" onclick="setStructure('ltf','BULLISH')">🟢 Bullish</button>
+            <button class="str-btn" id="ltf-bear" onclick="setStructure('ltf','BEARISH')">🔴 Bearish</button>
+            <button class="str-btn" id="ltf-cons" onclick="setStructure('ltf','CONSOLIDATION')">🟡 Cons</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -379,6 +407,34 @@
     document.getElementById('bias-bear').classList.toggle('active', b === 'BEARISH');
   }
 
+  let htfStructure = null;
+  let ltfStructure = null;
+  function setStructure(tf, val) {
+    const prefix = tf + '-';
+    ['bull','bear','cons'].forEach(k => {
+      const btn = document.getElementById(prefix+k);
+      btn.className = 'str-btn';
+    });
+    const current = tf === 'htf' ? htfStructure : ltfStructure;
+    if (current === val) {
+      if (tf === 'htf') htfStructure = null;
+      else ltfStructure = null;
+      return;
+    }
+    if (tf === 'htf') htfStructure = val;
+    else ltfStructure = val;
+    const cls = val === 'BULLISH' ? 'bull-active' : val === 'BEARISH' ? 'bear-active' : 'cons-active';
+    const key = val === 'BULLISH' ? 'bull' : val === 'BEARISH' ? 'bear' : 'cons';
+    document.getElementById(prefix+key).classList.add(cls);
+  }
+
+  function getStructureEmoji(val) { return val === 'BULLISH' ? '🟢' : val === 'BEARISH' ? '🔴' : '🟡'; }
+  function buildStructureString() {
+    const htf = htfStructure ? `> 📈 HTF: ${getStructureEmoji(htfStructure)} ${htfStructure}` : '> 📈 HTF: —';
+    const ltf = ltfStructure ? `> 📉 LTF: ${getStructureEmoji(ltfStructure)} ${ltfStructure}` : '> 📉 LTF: —';
+    return `${htf}\n${ltf}`;
+  }
+
   const entryTypes = {
     sd:    { label: 'S&D + Fibs Entry',      cls: 'sd-active'    },
     ema:   { label: 'EMA Pullback Entry',     cls: 'ema-active'   },
@@ -454,6 +510,9 @@
     const description =
 `${entryTag}${mcEmoji} **MARKET CONDITION: ${currentMarketCondition}**
 ${biasEmoji} **BIAS: ${currentBias}**
+
+**📊 Market Structure**
+${buildStructureString()}
 
 **📍 Primary Zone — ${primaryZone}**
 > 🎯 Zone Range: \`${interest}\`
